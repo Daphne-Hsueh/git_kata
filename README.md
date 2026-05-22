@@ -1,1 +1,1 @@
-# git_kata
+# GIT  Kata 2 
