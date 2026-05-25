@@ -26,3 +26,24 @@ def load_data(path: Optional[str] = None) -> pd.DataFrame:
 
 	return pd.read_csv(csv_path)
 
+
+	def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+		"""
+		Clean a pandas DataFrame by:
+		  - Dropping rows with missing values
+		  - Converting all categorical (object or category dtype) columns to lowercase
+		Args:
+			df: Input pandas DataFrame
+		Returns:
+			Cleaned pandas DataFrame
+		"""
+		# Drop rows with missing values
+		df_clean = df.dropna().copy()
+
+		# Convert categorical columns to lowercase
+		for col in df_clean.select_dtypes(include=["object", "category"]).columns:
+			df_clean[col] = df_clean[col].str.lower()
+
+		return df_clean
+
+
