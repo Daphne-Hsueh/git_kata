@@ -27,23 +27,36 @@ def load_data(path: Optional[str] = None) -> pd.DataFrame:
 	return pd.read_csv(csv_path)
 
 
-	def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-		"""
-		Clean a pandas DataFrame by:
-		  - Dropping rows with missing values
-		  - Converting all categorical (object or category dtype) columns to lowercase
-		Args:
-			df: Input pandas DataFrame
-		Returns:
-			Cleaned pandas DataFrame
-		"""
-		# Drop rows with missing values
-		df_clean = df.dropna().copy()
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+	"""
+	Clean a pandas DataFrame by:
+	  - Dropping rows where the passenger class column is missing (auto-detects column name)
+	  - Converting all categorical (object or category dtype) columns to lowercase
+	Args:
+	    df: Input pandas DataFrame
+	Returns:
+	    Cleaned pandas DataFrame
+	"""
 
-		# Convert categorical columns to lowercase
-		for col in df_clean.select_dtypes(include=["object", "category"]).columns:
-			df_clean[col] = df_clean[col].str.lower()
+	# Try to find the passenger class column (case-insensitive, strip spaces)
+	possible_names = ["pclass", "class", "passenger class"]
+	col_map = {col.strip().lower(): col for col in df.columns}
+	class_col = None
+	for name in possible_names:
+		if name in col_map:
+			class_col = col_map[name]
+			break
 
-		return df_clean
+	if class_col is None:
+		raise ValueError("Could not find a passenger class column (e.g., 'pclass', 'class') in DataFrame.")
+
+	# Drop rows only where the class column is missing
+	df_clean = df.dropna(subset=[class_col]).copy()
+
+	# Convert categorical columns to lowercase
+	for col in df_clean.select_dtypes(include=["object", "category"]).columns:
+		df_clean[col] = df_clean[col].str.lower()
+
+	return df_clean
 
 
